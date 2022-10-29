@@ -12,7 +12,7 @@ import (
 func PlaceOrder(foodID int) (*Order, error) {
 	// reserve food
 	body, _ := json.Marshal(map[string]interface{}{
-		"food_id": 1,
+		"FoodID": foodID,
 	})
 
 	reqBody := bytes.NewBuffer(body)
@@ -34,8 +34,8 @@ func PlaceOrder(foodID int) (*Order, error) {
 
 	// book food
 	body, _ = json.Marshal(map[string]interface{}{
-		"order_id": orderID,
-		"food_id":  foodID,
+		"OrderID": orderID,
+		"FoodID":  foodID,
 	})
 
 	reqBody = bytes.NewBuffer(body)
@@ -46,7 +46,7 @@ func PlaceOrder(foodID int) (*Order, error) {
 	}
 
 	body, _ = json.Marshal(map[string]interface{}{
-		"order_id": orderID,
+		"OrderID": orderID,
 	})
 
 	reqBody = bytes.NewBuffer(body)

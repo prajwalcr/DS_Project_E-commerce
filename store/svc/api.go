@@ -55,7 +55,7 @@ func ReserveFood(foodID int) (*Packet, error) {
 
 func BookFood(orderID string, foodID int) (*Packet, error) {
 	txn, _ := io.DB.Begin()
-
+	log.Println(orderID, foodID)
 	row := txn.QueryRow(`
 		SELECT id, food_id, is_reserved, order_id from packets
 		WHERE
@@ -112,5 +112,12 @@ func Clean() {
 	`)
 	if err != nil {
 		panic(err)
+	}
+
+	for i := 1; i < 11; i++ {
+		_, err := io.DB.Exec("insert into packets default values;")
+		if err != nil {
+			panic(err)
+		}
 	}
 }

@@ -3,6 +3,7 @@ package delivery
 import (
 	"database/sql"
 	"errors"
+	"log"
 
 	"github.com/prajwalcr/DS_Project_E-commerce/io"
 )
@@ -52,6 +53,7 @@ func ReserveAgent() (*Agent, error) {
 
 func BookAgent(orderID string) (*Agent, error) {
 	// booking the seat
+	log.Println(orderID)
 	txn, _ := io.DB.Begin()
 
 	// selecting the first available seat
@@ -78,7 +80,7 @@ func BookAgent(orderID string) (*Agent, error) {
 	_, err = txn.Exec(`
 		UPDATE agents
 		SET
-			is_reserved = false, orderID = $1
+			is_reserved = false, order_id = $1
 		WHERE id = $2`, orderID, agent.ID)
 	if err != nil {
 		txn.Rollback()
@@ -110,5 +112,12 @@ func Clean() {
 	`)
 	if err != nil {
 		panic(err)
+	}
+
+	for i := 1; i < 11; i++ {
+		_, err := io.DB.Exec("insert into agents default values;")
+		if err != nil {
+			panic(err)
+		}
 	}
 }
