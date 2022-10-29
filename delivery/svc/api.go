@@ -36,7 +36,7 @@ func ReserveAgent() (*Agent, error) {
 		UPDATE agents
 		SET
 			is_reserved = true
-		WHERE id = ?`, agent.ID)
+		WHERE id = $1`, agent.ID)
 	if err != nil {
 		txn.Rollback()
 		return nil, err
@@ -78,8 +78,8 @@ func BookAgent(orderID string) (*Agent, error) {
 	_, err = txn.Exec(`
 		UPDATE agents
 		SET
-			is_reserved = false, orderID = ?
-		WHERE id = ?`, orderID, agent.ID)
+			is_reserved = false, orderID = $1
+		WHERE id = $2`, orderID, agent.ID)
 	if err != nil {
 		txn.Rollback()
 		return nil, err
@@ -103,9 +103,12 @@ func Clean() {
 
 	_, err = io.DB.Exec(`
 		CREATE TABLE agents (
-			id int primary key auto_increment not null,
+			id serial primary key,
 			is_reserved bool default false,
 			order_id varchar(36) default null
-		)
+		);
 	`)
+	if err != nil {
+		panic(err)
+	}
 }

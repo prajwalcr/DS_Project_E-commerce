@@ -4,10 +4,12 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prajwalcr/DS_Project_E-commerce/io"
 	store "github.com/prajwalcr/DS_Project_E-commerce/store/svc"
 )
 
 func main() {
+	io.Connect()
 	store.Clean()
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()

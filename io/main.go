@@ -9,17 +9,19 @@ import (
 
 var DB *sql.DB
 
-func main() {
-	connStr := "user=postgres dbname=twopc host=localhost sslmode=disable"
-	DB, err := sql.Open("postgres", connStr)
+func Connect() {
+	// Change user and password and also create database called twopc
+	connStr := "user=postgres dbname=twopc password=12345 host=localhost"
+	db, err := sql.Open("postgres", connStr)
+	DB = db
 	if err != nil {
 		panic(err)
 	}
-	defer DB.Close()
 
 	err = DB.Ping()
 	if err != nil {
 		panic(err)
 	}
 	fmt.Printf("\nSuccessfully connected to database!\n")
+	//defer DB.Close()
 }

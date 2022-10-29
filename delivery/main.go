@@ -5,9 +5,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	delivery "github.com/prajwalcr/DS_Project_E-commerce/delivery/svc"
+	"github.com/prajwalcr/DS_Project_E-commerce/io"
 )
 
 func main() {
+	io.Connect()
 	delivery.Clean()
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
