@@ -1,8 +1,8 @@
-package api
+package svc
 
 import 
 (
-	"github/google/uuid"
+	"github.com/google/uuid"
 	"errors"
 	"bytes"
 	"encoding/json"
