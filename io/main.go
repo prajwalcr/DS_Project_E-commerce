@@ -7,6 +7,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
+var DB *sql.DB
+
 func main() {
 	connStr := "user=postgres dbname=twopc host=localhost sslmode=disable"
 	DB, err := sql.Open("postgres", connStr)
