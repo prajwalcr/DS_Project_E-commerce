@@ -3,13 +3,13 @@ package main
 import (
 	"log"
 
-	delivery "github.com/prajwalcr/DS_Project_E-commerce/delivery/svc"
 	"github.com/gin-gonic/gin"
+	delivery "github.com/prajwalcr/DS_Project_E-commerce/delivery/svc"
 )
 
 func main() {
 	delivery.Clean()
-	git.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.POST("/delivery/agent/reserve", func(c *gin.Context) {
 
@@ -27,7 +27,7 @@ func main() {
 		c.JSON(200, delivery.ReserveAgentResponse{AgentID: agent.ID})
 	})
 
-	r.POST("/delivery/agent/book", fun(c *gin.Context) {
+	r.POST("/delivery/agent/book", func(c *gin.Context) {
 		// if rand. Float64() < 0.2 {
 		// c.JSON(500, errors.New("service down"))
 		// return

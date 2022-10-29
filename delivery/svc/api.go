@@ -3,7 +3,7 @@ package delivery
 import (
 	"database/sql"
 	"errors"
-	"log"
+
 	"github.com/prajwalcr/DS_Project_E-commerce/io"
 )
 
@@ -38,7 +38,7 @@ func ReserveAgent() (*Agent, error) {
 			is_reserved = true
 		WHERE id = ?`, agent.ID)
 	if err != nil {
-		txn.Rollack()
+		txn.Rollback()
 		return nil, err
 	}
 
@@ -81,7 +81,7 @@ func BookAgent(orderID string) (*Agent, error) {
 			is_reserved = false, orderID = ?
 		WHERE id = ?`, orderID, agent.ID)
 	if err != nil {
-		txn.Rollack()
+		txn.Rollback()
 		return nil, err
 	}
 

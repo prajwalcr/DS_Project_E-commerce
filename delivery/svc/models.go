@@ -1,7 +1,9 @@
 package delivery
 
+import "database/sql"
+
 type Agent struct {
-	ID int
+	ID         int
 	IsReserved bool
-	OrderID sql.NullString
+	OrderID    sql.NullString
 }

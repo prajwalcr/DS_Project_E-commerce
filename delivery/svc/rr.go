@@ -5,10 +5,10 @@ type ReserveAgentResponse struct {
 }
 
 type BookAgentRequest struct {
-	OrderID sql.NullString
+	OrderID string
 }
 
 type BookAgentResponse struct {
 	AgentID int
-	OrderID sql.NullString
+	OrderID string
 }
