@@ -1,5 +1,5 @@
 package orders
 
 type Order struct {
-	ID int
+	ID string
 }
