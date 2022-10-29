@@ -13,6 +13,6 @@ type BookFoodRequest struct {
 	FoodID  int
 }
 
-type BookFoodResponse struct{
+type BookFoodResponse struct {
 	OrderID string
 }

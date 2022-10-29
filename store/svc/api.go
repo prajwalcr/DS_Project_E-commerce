@@ -52,7 +52,7 @@ func ReserveFood(foodID int) (*Packet, error) {
 }
 
 func BookFood(orderID string, foodID int) (*Packet, error){
-	txn, _ = io.DB.Begin()
+	txn, _ := io.DB.Begin()
 
 	row := txn.QueryRow(`
 		SELECT id, food_id, is_reserved, order_id from packets
