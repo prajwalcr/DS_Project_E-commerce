@@ -17,11 +17,13 @@ func main() {
 		var req store.ReserveFoodRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.AbortWithStatus(400)
+			return
 		}
 
 		_, err := store.ReserveFood(req.FoodID)
 		if err != nil {
 			c.AbortWithError(500, err)
+			return
 		}
 
 		c.JSON(200, store.ReserveFoodResponse{Reserved: true})
@@ -31,14 +33,14 @@ func main() {
 		var req store.BookFoodRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.AbortWithStatus(400)
+			return
 		}
 
 		packet, err := store.BookFood(req.OrderID, req.FoodID)
 		if err != nil {
-			log.Fatal(err)
 			c.AbortWithError(500, err)
+			return
 		}
-
 		c.JSON(200, store.BookFoodResponse{OrderID: packet.OrderID.String})
 	})
 	log.Println("running the store service on port 8081")

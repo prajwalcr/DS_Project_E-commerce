@@ -15,14 +15,9 @@ func main() {
 	r := gin.Default()
 	r.POST("/delivery/agent/reserve", func(c *gin.Context) {
 
-		// if rand. Float64() < 0.2 {
-		// c.JSON(500, errors.New("service down"))
-		// return
-		// }
-
 		agent, err := delivery.ReserveAgent()
 		if err != nil {
-			c.JSON(429, err)
+			c.AbortWithError(500, err)
 			return
 		}
 
@@ -30,10 +25,6 @@ func main() {
 	})
 
 	r.POST("/delivery/agent/book", func(c *gin.Context) {
-		// if rand. Float64() < 0.2 {
-		// c.JSON(500, errors.New("service down"))
-		// return
-		// }
 
 		var req delivery.BookAgentRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -42,7 +33,7 @@ func main() {
 
 		agent, err := delivery.BookAgent(req.OrderID)
 		if err != nil {
-			c.JSON(429, err)
+			c.AbortWithError(500, err)
 			return
 		}
 

@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"sync"
-	"time"
 
 	orders "github.com/prajwalcr/DS_Project_E-commerce/orders/svc"
 )
@@ -12,12 +11,13 @@ func main() {
 	foodID := 1
 	var wg sync.WaitGroup
 
-	wg.Add(10)
+	numberOfOrders := 10
 
-	for i := 0; i < 10; i++ {
+	wg.Add(numberOfOrders)
+
+	for i := 0; i < numberOfOrders; i++ {
 		go func() {
 			order, err := orders.PlaceOrder(foodID)
-			time.Sleep(1)
 			if err != nil {
 				log.Println("order not placed : ", err.Error())
 			} else {

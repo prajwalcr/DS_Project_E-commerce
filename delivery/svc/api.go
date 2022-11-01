@@ -28,9 +28,13 @@ func ReserveAgent() (*Agent, error) {
 	var agent Agent
 	err := row.Scan(&agent.ID, &agent.IsReserved, &agent.OrderID)
 
-	if err != nil {
+	if err != nil && err == sql.ErrNoRows {
 		txn.Rollback()
 		return nil, errors.New("no delivery agent available")
+	}
+	if err != nil {
+		txn.Rollback()
+		return nil, err
 	}
 
 	_, err = txn.Exec(`
@@ -75,6 +79,10 @@ func BookAgent(orderID string) (*Agent, error) {
 	if err != nil && err == sql.ErrNoRows {
 		txn.Rollback()
 		return nil, errors.New("no delivery agent available")
+	}
+	if err != nil {
+		txn.Rollback()
+		return nil, err
 	}
 
 	_, err = txn.Exec(`

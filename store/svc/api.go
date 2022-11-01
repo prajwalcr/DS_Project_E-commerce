@@ -32,6 +32,10 @@ func ReserveFood(foodID int) (*Packet, error) {
 		txn.Rollback()
 		return nil, errors.New("No food packet available")
 	}
+	if err != nil {
+		txn.Rollback()
+		return nil, err
+	}
 
 	_, err = txn.Exec(`
 		UPDATE packets
@@ -68,10 +72,15 @@ func BookFood(orderID string, foodID int) (*Packet, error) {
 	}
 
 	var packet Packet
-	err := row.Scan(&packet.ID, &packet.IsReserved, &packet.FoodID, &packet.OrderID)
+	err := row.Scan(&packet.ID, &packet.FoodID, &packet.IsReserved, &packet.OrderID)
 
 	if err != nil && err == sql.ErrNoRows {
+		txn.Rollback()
 		return nil, errors.New("no food packet available")
+	}
+	if err != nil {
+		txn.Rollback()
+		return nil, err
 	}
 
 	_, err = txn.Exec(`
