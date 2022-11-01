@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	foodID := 1
+	productID := 1
 	var wg sync.WaitGroup
 
 	numberOfOrders := 10
@@ -17,7 +17,7 @@ func main() {
 
 	for i := 0; i < numberOfOrders; i++ {
 		go func() {
-			order, err := orders.PlaceOrder(foodID)
+			order, err := orders.PlaceOrder(productID)
 			if err != nil {
 				log.Println("order not placed : ", err.Error())
 			} else {

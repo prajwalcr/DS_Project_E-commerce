@@ -1,10 +1,9 @@
-package store
+package transport
 
 import "database/sql"
 
-type Packet struct {
+type Vehicle struct {
 	ID         int
-	ProductID     int
 	IsReserved bool
 	OrderID    sql.NullString
 }

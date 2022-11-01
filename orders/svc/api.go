@@ -9,20 +9,20 @@ import (
 	"github.com/google/uuid"
 )
 
-func PlaceOrder(foodID int) (*Order, error) {
-	// reserve food
+func PlaceOrder(productID int) (*Order, error) {
+	// reserve product
 	body, _ := json.Marshal(map[string]interface{}{
-		"FoodID": foodID,
+		"ProductID": productID,
 	})
 
 	reqBody := bytes.NewBuffer(body)
 
-	resp1, err := http.Post("http://localhost:8081/store/food/reserve", "application/json", reqBody)
+	resp1, err := http.Post("http://localhost:8081/store/product/reserve", "application/json", reqBody)
 	if err != nil {
 		return nil, err
 	}
 	if resp1.StatusCode != 200 {
-		return nil, errors.New("food not available")
+		return nil, errors.New("product not available")
 	}
 
 	// reserve agent
@@ -34,23 +34,34 @@ func PlaceOrder(foodID int) (*Order, error) {
 		return nil, errors.New("delivery agent not availabe")
 	}
 
+	// reserve vehicle
+	resp5, err := http.Post("http://localhost:8083/transport/vehicle/reserve", "application/json", nil)
+	if err != nil {
+		return nil, err
+	}
+	if resp5.StatusCode != 200 {
+		return nil, errors.New("transport vehicle not availabe")
+	}
+
 	orderID := uuid.New().String()
 
-	// book food
+	// book product
 	body, _ = json.Marshal(map[string]interface{}{
 		"OrderID": orderID,
-		"FoodID":  foodID,
+		"ProductID":  productID,
 	})
 
 	reqBody = bytes.NewBuffer(body)
-	resp3, err := http.Post("http://localhost:8081/store/food/book", "application/json", reqBody)
+	resp3, err := http.Post("http://localhost:8081/store/product/book", "application/json", reqBody)
+	
 	if err != nil {
 		return nil, err
 	}
 	if resp3.StatusCode != 200 {
-		return nil, errors.New("could not assign food to an order")
+		return nil, errors.New("could not assign product to an order")
 	}
 
+	// book agent
 	body, _ = json.Marshal(map[string]interface{}{
 		"OrderID": orderID,
 	})
@@ -63,6 +74,21 @@ func PlaceOrder(foodID int) (*Order, error) {
 	}
 	if resp4.StatusCode != 200 {
 		return nil, errors.New("could not assign delivery agent to an order")
+	}
+
+	// book vehicle
+	body, _ = json.Marshal(map[string]interface{}{
+		"OrderID": orderID,
+	})
+
+	reqBody = bytes.NewBuffer(body)
+	resp6, err := http.Post("http://localhost:8083/transport/vehicle/book", "application/json", reqBody)
+
+	if err != nil {
+		return nil, err
+	}
+	if resp6.StatusCode != 200 {
+		return nil, errors.New("could not assign transport vehicle to an order")
 	}
 
 	return &Order{ID: orderID}, nil

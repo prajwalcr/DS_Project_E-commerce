@@ -1,18 +1,18 @@
 package store
 
-type ReserveFoodRequest struct {
-	FoodID int
+type ReserveProductRequest struct {
+	ProductID int
 }
 
-type ReserveFoodResponse struct {
+type ReserveProductResponse struct {
 	Reserved bool
 }
 
-type BookFoodRequest struct {
+type BookProductRequest struct {
 	OrderID string
-	FoodID  int
+	ProductID  int
 }
 
-type BookFoodResponse struct {
+type BookProductResponse struct {
 	OrderID string
 }

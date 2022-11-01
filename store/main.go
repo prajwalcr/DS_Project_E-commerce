@@ -13,35 +13,35 @@ func main() {
 	store.Clean()
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
-	r.POST("/store/food/reserve", func(c *gin.Context) {
-		var req store.ReserveFoodRequest
+	r.POST("/store/product/reserve", func(c *gin.Context) {
+		var req store.ReserveProductRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.AbortWithStatus(400)
 			return
 		}
 
-		_, err := store.ReserveFood(req.FoodID)
+		_, err := store.ReserveProduct(req.ProductID)
 		if err != nil {
 			c.AbortWithError(500, err)
 			return
 		}
 
-		c.JSON(200, store.ReserveFoodResponse{Reserved: true})
+		c.JSON(200, store.ReserveProductResponse{Reserved: true})
 	})
 
-	r.POST("/store/food/book", func(c *gin.Context) {
-		var req store.BookFoodRequest
+	r.POST("/store/product/book", func(c *gin.Context) {
+		var req store.BookProductRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.AbortWithStatus(400)
 			return
 		}
 
-		packet, err := store.BookFood(req.OrderID, req.FoodID)
+		packet, err := store.BookProduct(req.OrderID, req.ProductID)
 		if err != nil {
 			c.AbortWithError(500, err)
 			return
 		}
-		c.JSON(200, store.BookFoodResponse{OrderID: packet.OrderID.String})
+		c.JSON(200, store.BookProductResponse{OrderID: packet.OrderID.String})
 	})
 	log.Println("running the store service on port 8081")
 	r.Run(":8081")

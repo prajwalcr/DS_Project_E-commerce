@@ -11,7 +11,7 @@ var DB *sql.DB
 
 func Connect() {
 	// Change user and password and also create database called twopc
-	connStr := "user=postgres dbname=twopc password=12345 host=localhost"
+	connStr := "user=vishishtrao dbname=twopc password=12345 host=localhost sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	DB = db
 	if err != nil {
