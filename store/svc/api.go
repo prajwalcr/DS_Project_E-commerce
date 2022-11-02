@@ -22,6 +22,7 @@ func ReserveProduct(productID int) (*Packet, error) {
 		FOR UPDATE;
 	`, productID)
 	if row.Err() != nil {
+		txn.Rollback()
 		return nil, row.Err()
 	}
 
@@ -50,7 +51,6 @@ func ReserveProduct(productID int) (*Packet, error) {
 
 	err = txn.Commit()
 	if err != nil {
-		txn.Rollback()
 		return nil, err
 	}
 
@@ -68,6 +68,7 @@ func BookProduct(orderID string, productID int) (*Packet, error) {
 		FOR UPDATE
 	`, productID)
 	if row.Err() != nil {
+		txn.Rollback()
 		return nil, row.Err()
 	}
 
@@ -91,12 +92,12 @@ func BookProduct(orderID string, productID int) (*Packet, error) {
 			id = $2
 	`, orderID, packet.ID)
 	if err != nil {
+		txn.Rollback()
 		return nil, err
 	}
 
 	err = txn.Commit()
 	if err != nil {
-		txn.Rollback()
 		return nil, err
 	}
 
