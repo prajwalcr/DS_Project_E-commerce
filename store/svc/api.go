@@ -15,10 +15,10 @@ func ReserveProduct(productID int) (*Packet, error) {
 	txn, _ := io.DB.Begin()
 
 	row := txn.QueryRow(`
-		SELECT id, product_id, is_reserved, order_id
+		SELECT id, product_id, reserved_timestamp, order_id
 		FROM packets
 		WHERE
-			is_reserved < current_timestamp - (10 * interval '1 second') and product_id = $1 and order_id is NULL
+			reserved_timestamp < current_timestamp - (10 * interval '1 second') and product_id = $1 and order_id is NULL
 		LIMIT 1
 		FOR UPDATE;
 	`, productID)
@@ -42,7 +42,7 @@ func ReserveProduct(productID int) (*Packet, error) {
 	_, err = txn.Exec(`
 		UPDATE packets
 		SET
-			is_reserved = current_timestamp
+			reserved_timestamp = current_timestamp
 		WHERE id = $1
 	`, packet.ID)
 
@@ -62,9 +62,9 @@ func BookProduct(orderID string, productID int) (*Packet, error) {
 	txn, _ := io.DB.Begin()
 	log.Println(orderID, productID)
 	row := txn.QueryRow(`
-		SELECT id, product_id, is_reserved, order_id from packets
+		SELECT id, product_id, reserved_timestamp, order_id from packets
 		WHERE
-			is_reserved >= current_timestamp - (10 * interval '1 second') and order_id is NULL and product_id = $1
+			reserved_timestamp >= current_timestamp - (10 * interval '1 second') and order_id is NULL and product_id = $1
 		LIMIT 1
 		FOR UPDATE
 	`, productID)
@@ -88,7 +88,7 @@ func BookProduct(orderID string, productID int) (*Packet, error) {
 	_, err = txn.Exec(`
 		UPDATE 	packets
 		SET
-			is_reserved = current_timestamp, order_id = $1
+			reserved_timestamp = current_timestamp, order_id = $1
 		WHERE
 			id = $2
 	`, orderID, packet.ID)
@@ -116,7 +116,7 @@ func Clean() {
 	_, err = io.DB.Exec(`
 		CREATE TABLE packets (
 			id serial primary key,
-			is_reserved timestamp default '2000-01-01 00:00:00',
+			reserved_timestamp timestamp default '2000-01-01 00:00:00',
 			order_id varchar(36) default null,
 			product_id int default 1
 		);

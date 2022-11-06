@@ -15,9 +15,9 @@ func ReserveAgent() (*Agent, error) {
 
 	//selecting the first available agent
 	row := txn.QueryRow(`
-		SELECT id, is_reserved, order_id from agents
+		SELECT id, reserved_timestamp, order_id from agents
 		WHERE
-			is_reserved < current_timestamp - (10 * interval '1 second') and order_id is NULL
+			reserved_timestamp < current_timestamp - (10 * interval '1 second') and order_id is NULL
 		LIMIT 1
 		FOR UPDATE
 	`)
@@ -41,7 +41,7 @@ func ReserveAgent() (*Agent, error) {
 	_, err = txn.Exec(`
 		UPDATE agents
 		SET
-			is_reserved = current_timestamp
+			reserved_timestamp = current_timestamp
 		WHERE id = $1`, agent.ID)
 	if err != nil {
 		txn.Rollback()
@@ -63,9 +63,9 @@ func BookAgent(orderID string) (*Agent, error) {
 
 	// selecting the first available seat
 	row := txn.QueryRow(`
-		SELECT id, is_reserved, order_id from agents
+		SELECT id, reserved_timestamp, order_id from agents
 		WHERE
-			is_reserved >= current_timestamp - (10 * interval '1 second') and order_id is NULL
+			reserved_timestamp >= current_timestamp - (10 * interval '1 second') and order_id is NULL
 		LIMIT 1
 		FOR UPDATE
 	`)
@@ -89,7 +89,7 @@ func BookAgent(orderID string) (*Agent, error) {
 	_, err = txn.Exec(`
 		UPDATE agents
 		SET
-			is_reserved = current_timestamp, order_id = $1
+			reserved_timestamp = current_timestamp, order_id = $1
 		WHERE id = $2`, orderID, agent.ID)
 	if err != nil {
 		txn.Rollback()
@@ -115,7 +115,7 @@ func Clean() {
 	_, err = io.DB.Exec(`
 		CREATE TABLE agents (
 			id serial primary key,
-			is_reserved timestamp default '2000-01-01 00:00:00',
+			reserved_timestamp timestamp default '2000-01-01 00:00:00',
 			order_id varchar(36) default null
 		);
 	`)
