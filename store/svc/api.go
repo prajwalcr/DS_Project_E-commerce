@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"log"
+	"time"
 
 	"github.com/prajwalcr/DS_Project_E-commerce/io"
 )
@@ -17,7 +18,7 @@ func ReserveProduct(productID int) (*Packet, error) {
 		SELECT id, product_id, is_reserved, order_id
 		FROM packets
 		WHERE
-			is_reserved is false and product_id = $1 and order_id is NULL
+			is_reserved < current_timestamp - (10 * interval '1 second') and product_id = $1 and order_id is NULL
 		LIMIT 1
 		FOR UPDATE;
 	`, productID)
@@ -41,7 +42,7 @@ func ReserveProduct(productID int) (*Packet, error) {
 	_, err = txn.Exec(`
 		UPDATE packets
 		SET
-			is_reserved = True
+			is_reserved = current_timestamp
 		WHERE id = $1
 	`, packet.ID)
 
@@ -63,7 +64,7 @@ func BookProduct(orderID string, productID int) (*Packet, error) {
 	row := txn.QueryRow(`
 		SELECT id, product_id, is_reserved, order_id from packets
 		WHERE
-			is_reserved is true and order_id is NULL and product_id = $1
+			is_reserved >= current_timestamp - (10 * interval '1 second') and order_id is NULL and product_id = $1
 		LIMIT 1
 		FOR UPDATE
 	`, productID)
@@ -87,7 +88,7 @@ func BookProduct(orderID string, productID int) (*Packet, error) {
 	_, err = txn.Exec(`
 		UPDATE 	packets
 		SET
-			is_reserved = false, order_id = $1
+			is_reserved = current_timestamp, order_id = $1
 		WHERE
 			id = $2
 	`, orderID, packet.ID)
@@ -101,7 +102,7 @@ func BookProduct(orderID string, productID int) (*Packet, error) {
 		return nil, err
 	}
 
-	packet.IsReserved = false
+	packet.IsReserved = sql.NullTime{Time: time.Now()}
 	packet.OrderID = sql.NullString{String: orderID}
 	return &packet, nil
 }
@@ -115,7 +116,7 @@ func Clean() {
 	_, err = io.DB.Exec(`
 		CREATE TABLE packets (
 			id serial primary key,
-			is_reserved bool default false,
+			is_reserved timestamp default '2000-01-01 00:00:00',
 			order_id varchar(36) default null,
 			product_id int default 1
 		);

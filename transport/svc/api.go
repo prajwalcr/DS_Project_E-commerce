@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"log"
+	"time"
 
 	"github.com/prajwalcr/DS_Project_E-commerce/io"
 )
@@ -16,7 +17,7 @@ func ReserveVehicle() (*Vehicle, error) {
 	row := txn.QueryRow(`
 		SELECT id, is_reserved, order_id from vehicles
 		WHERE
-			is_reserved is false and order_id is NULL
+			is_reserved < current_timestamp - (10 * interval '1 second') and order_id is NULL
 		LIMIT 1
 		FOR UPDATE
 	`)
@@ -40,7 +41,7 @@ func ReserveVehicle() (*Vehicle, error) {
 	_, err = txn.Exec(`
 		UPDATE vehicles
 		SET
-			is_reserved = true
+			is_reserved = current_timestamp
 		WHERE id = $1`, vehicle.ID)
 	if err != nil {
 		txn.Rollback()
@@ -60,11 +61,10 @@ func BookVehicle(orderID string) (*Vehicle, error) {
 	log.Println(orderID)
 	txn, _ := io.DB.Begin()
 
-
 	row := txn.QueryRow(`
 		SELECT id, is_reserved, order_id from vehicles
 		WHERE
-			is_reserved is true and order_id is NULL
+			is_reserved >= current_timestamp - (10 * interval '1 second') and order_id is NULL
 		LIMIT 1
 		FOR UPDATE
 	`)
@@ -88,7 +88,7 @@ func BookVehicle(orderID string) (*Vehicle, error) {
 	_, err = txn.Exec(`
 		UPDATE vehicles
 		SET
-			is_reserved = false, order_id = $1
+			is_reserved = current_timestamp, order_id = $1
 		WHERE id = $2`, orderID, vehicle.ID)
 	if err != nil {
 		txn.Rollback()
@@ -100,7 +100,7 @@ func BookVehicle(orderID string) (*Vehicle, error) {
 		return nil, err
 	}
 
-	vehicle.IsReserved = false
+	vehicle.IsReserved = sql.NullTime{Time: time.Now()}
 	vehicle.OrderID = sql.NullString{String: orderID}
 	return &vehicle, nil
 }
@@ -114,7 +114,7 @@ func Clean() {
 	_, err = io.DB.Exec(`
 		CREATE TABLE vehicles (
 			id serial primary key,
-			is_reserved bool default false,
+			is_reserved timestamp default '2000-01-01 00:00:00',
 			order_id varchar(36) default null
 		);
 	`)

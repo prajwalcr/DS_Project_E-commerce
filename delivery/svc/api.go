@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"log"
+	"time"
 
 	"github.com/prajwalcr/DS_Project_E-commerce/io"
 )
@@ -16,7 +17,7 @@ func ReserveAgent() (*Agent, error) {
 	row := txn.QueryRow(`
 		SELECT id, is_reserved, order_id from agents
 		WHERE
-			is_reserved is false and order_id is NULL
+			is_reserved < current_timestamp - (10 * interval '1 second') and order_id is NULL
 		LIMIT 1
 		FOR UPDATE
 	`)
@@ -40,7 +41,7 @@ func ReserveAgent() (*Agent, error) {
 	_, err = txn.Exec(`
 		UPDATE agents
 		SET
-			is_reserved = true
+			is_reserved = current_timestamp
 		WHERE id = $1`, agent.ID)
 	if err != nil {
 		txn.Rollback()
@@ -64,7 +65,7 @@ func BookAgent(orderID string) (*Agent, error) {
 	row := txn.QueryRow(`
 		SELECT id, is_reserved, order_id from agents
 		WHERE
-			is_reserved is true and order_id is NULL
+			is_reserved >= current_timestamp - (10 * interval '1 second') and order_id is NULL
 		LIMIT 1
 		FOR UPDATE
 	`)
@@ -88,7 +89,7 @@ func BookAgent(orderID string) (*Agent, error) {
 	_, err = txn.Exec(`
 		UPDATE agents
 		SET
-			is_reserved = false, order_id = $1
+			is_reserved = current_timestamp, order_id = $1
 		WHERE id = $2`, orderID, agent.ID)
 	if err != nil {
 		txn.Rollback()
@@ -100,7 +101,7 @@ func BookAgent(orderID string) (*Agent, error) {
 		return nil, err
 	}
 
-	agent.IsReserved = false
+	agent.IsReserved = sql.NullTime{Time: time.Now()}
 	agent.OrderID = sql.NullString{String: orderID}
 	return &agent, nil
 }
@@ -114,7 +115,7 @@ func Clean() {
 	_, err = io.DB.Exec(`
 		CREATE TABLE agents (
 			id serial primary key,
-			is_reserved bool default false,
+			is_reserved timestamp default '2000-01-01 00:00:00',
 			order_id varchar(36) default null
 		);
 	`)

@@ -4,6 +4,6 @@ import "database/sql"
 
 type Agent struct {
 	ID         int
-	IsReserved bool
+	IsReserved sql.NullTime
 	OrderID    sql.NullString
 }
