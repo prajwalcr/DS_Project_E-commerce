@@ -15,9 +15,9 @@ func ReserveVehicle() (*Vehicle, error) {
 
 	//selecting the first available vehicle
 	row := txn.QueryRow(`
-		SELECT id, is_reserved, order_id from vehicles
+		SELECT id, reserved_timestamp, order_id from vehicles
 		WHERE
-			is_reserved < current_timestamp - (10 * interval '1 second') and order_id is NULL
+			reserved_timestamp < current_timestamp - (10 * interval '1 second') and order_id is NULL
 		LIMIT 1
 		FOR UPDATE
 	`)
@@ -41,7 +41,7 @@ func ReserveVehicle() (*Vehicle, error) {
 	_, err = txn.Exec(`
 		UPDATE vehicles
 		SET
-			is_reserved = current_timestamp
+			reserved_timestamp = current_timestamp
 		WHERE id = $1`, vehicle.ID)
 	if err != nil {
 		txn.Rollback()
@@ -62,9 +62,9 @@ func BookVehicle(orderID string) (*Vehicle, error) {
 	txn, _ := io.DB.Begin()
 
 	row := txn.QueryRow(`
-		SELECT id, is_reserved, order_id from vehicles
+		SELECT id, reserved_timestamp, order_id from vehicles
 		WHERE
-			is_reserved >= current_timestamp - (10 * interval '1 second') and order_id is NULL
+			reserved_timestamp >= current_timestamp - (10 * interval '1 second') and order_id is NULL
 		LIMIT 1
 		FOR UPDATE
 	`)
@@ -88,7 +88,7 @@ func BookVehicle(orderID string) (*Vehicle, error) {
 	_, err = txn.Exec(`
 		UPDATE vehicles
 		SET
-			is_reserved = current_timestamp, order_id = $1
+			reserved_timestamp = current_timestamp, order_id = $1
 		WHERE id = $2`, orderID, vehicle.ID)
 	if err != nil {
 		txn.Rollback()
@@ -114,7 +114,7 @@ func Clean() {
 	_, err = io.DB.Exec(`
 		CREATE TABLE vehicles (
 			id serial primary key,
-			is_reserved timestamp default '2000-01-01 00:00:00',
+			reserved_timestamp timestamp default '2000-01-01 00:00:00',
 			order_id varchar(36) default null
 		);
 	`)
